@@ -7,12 +7,14 @@ import { motion } from 'framer-motion';
 import { fartRooms, getRandomRoom } from '@/lib/rooms';
 import { Shuffle, Volume2, VolumeX, Users } from 'lucide-react';
 import BackgroundAudio from '@/components/BackgroundAudio';
+import GasMeter from '@/components/GasMeter';
 import { io } from 'socket.io-client';
 
 export default function Home() {
   const [randomRoom, setRandomRoom] = useState(getRandomRoom());
   const [audioEnabled, setAudioEnabled] = useState(false);
   const [roomsWithMembers, setRoomsWithMembers] = useState(fartRooms);
+  const [totalMessages, setTotalMessages] = useState(0);
 
   useEffect(() => {
     // Connect to Socket.IO for real-time member counts
@@ -27,6 +29,15 @@ export default function Home() {
           memberCount: counts[room.id] || 0
         }))
       );
+    });
+
+    // Listen for new messages to update gas meter
+    socket.on('new-user-message', () => {
+      setTotalMessages(prev => prev + 1);
+    });
+
+    socket.on('new-ai-message', () => {
+      setTotalMessages(prev => prev + 1);
     });
 
     // Fetch initial counts
@@ -103,6 +114,15 @@ export default function Home() {
           </button>
         </div>
       </motion.div>
+
+      {/* Gas Meter */}
+      <GasMeter 
+        totalMessages={totalMessages}
+        onGasExplosion={() => {
+          // Play explosion sound or trigger other effects
+          console.log('💥 GAS EXPLOSION! 💥');
+        }}
+      />
 
       {/* Random Room Button */}
       <motion.div 
