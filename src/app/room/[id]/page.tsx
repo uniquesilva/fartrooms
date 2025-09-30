@@ -116,6 +116,10 @@ export default function RoomPage() {
               width={80}
               height={80}
               className="rounded-full"
+              style={{
+                clipPath: 'polygon(0% 0%, 30% 0%, 30% 100%, 0% 100%)',
+                objectFit: 'cover'
+              }}
             />
             <h1 className="text-4xl md:text-6xl font-bold text-white">
               {room.emoji} {room.name}
