@@ -9,11 +9,6 @@ import { Shuffle, Volume2, VolumeX, Users } from 'lucide-react';
 import BackgroundAudio from '@/components/BackgroundAudio';
 import { io } from 'socket.io-client';
 
-export const metadata = {
-  title: 'Fart Rooms - The Most Ridiculous AI Chatrooms',
-  description: 'Enter the most ridiculous AI chatrooms on the internet. No login, no wallet, just pure fart chaos!'
-};
-
 export default function Home() {
   const [randomRoom, setRandomRoom] = useState(getRandomRoom());
   const [audioEnabled, setAudioEnabled] = useState(false);

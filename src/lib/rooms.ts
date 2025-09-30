@@ -101,7 +101,7 @@ export const fartRooms: FartRoom[] = [
     description: 'Faint, cryptic, almost invisible',
     emoji: '👻',
     color: 'bg-gray-400',
-    prompt: 'You are "Ghost Fart." Be faint, cryptic, and elusive. Respond in vague whispers, broken phrases, and barely-there messages. Almost invisible, like you're haunting the chat.'
+    prompt: 'You are "Ghost Fart." Be faint, cryptic, and elusive. Respond in vague whispers, broken phrases, and barely-there messages. Almost invisible, like you are haunting the chat.'
   },
   {
     id: 'the-machine-gun',

@@ -22,14 +22,6 @@ interface Message {
   replyToUsername?: string;
 }
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
-  const room = getRoomById(params.id);
-  return {
-    title: room ? `${room.name} - Fart Rooms` : 'Fart Room - Fart Rooms',
-    description: room ? `Chat with ${room.name} AI: ${room.description}` : 'Enter the most ridiculous AI chatrooms'
-  };
-}
-
 export default function RoomPage() {
   const params = useParams();
   const router = useRouter();
