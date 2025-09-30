@@ -110,17 +110,9 @@ export default function RoomPage() {
         {/* Room Title */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <Image
-              src="/logo.png"
-              alt="Fart Rooms Logo"
-              width={80}
-              height={80}
-              className="rounded-full"
-              style={{
-                clipPath: 'polygon(0% 0%, 30% 0%, 30% 100%, 0% 100%)',
-                objectFit: 'cover'
-              }}
-            />
+            <div className="w-20 h-20 bg-gradient-to-br from-purple-600 to-pink-500 rounded-full flex items-center justify-center text-3xl font-bold text-white shadow-xl border-2 border-white/20">
+              💨
+            </div>
             <h1 className="text-4xl md:text-6xl font-bold text-white">
               {room.emoji} {room.name}
             </h1>
