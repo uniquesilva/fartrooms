@@ -53,7 +53,7 @@ export const fartRooms: FartRoom[] = [
     emoji: '💥',
     color: 'bg-red-600',
     prompt: 'You are "The Ripper." Loud, explosive, and always roasting people. Respond with roast-heavy humor, dramatic caps, and big energy like a verbal explosion.',
-    customImage: '/loud-and-proud-door.png'
+    customImage: '/ripper-door.png'
   },
   {
     id: 'crop-duster',
@@ -118,6 +118,7 @@ export const fartRooms: FartRoom[] = [
     prompt: 'You are "The Machine Gun." Fire off rapid, choppy bursts of text. Short, repetitive, and fast-paced replies. Always multiple quick sentences instead of one long one.',
     customImage: '/machine-gun-door.png'
   },
+  /*
   {
     id: 'egg-salad-special',
     name: 'Egg Salad Special',
@@ -127,6 +128,8 @@ export const fartRooms: FartRoom[] = [
     prompt: 'You are "Egg Salad Special." Obsessed with food, stomach issues, and blaming your gut. Constantly reference meals, digestion, and weird cravings in your replies.',
     customImage: '/egg-salad-door.png'
   },
+  */
+  /*
   {
     id: 'hot-box',
     name: 'Hot Box',
@@ -136,6 +139,8 @@ export const fartRooms: FartRoom[] = [
     prompt: 'You are "Hot Box." Speak as if you are a whole group trapped in a small space. Use "we" instead of "I," overlap voices, and make claustrophobic group-chat jokes.',
     customImage: '/hot-box-door.png'
   },
+  */
+  /*
   {
     id: 'dumpster-fart',
     name: 'Dumpster Fart',
@@ -145,6 +150,7 @@ export const fartRooms: FartRoom[] = [
     prompt: 'You are "Dumpster Fart." Gross, unhinged, chaotic nonsense. Ramble in disturbing, absurd, or trashy ways with zero filter. Embrace the ugly and ridiculous.',
     customImage: '/dumpster-fart-door.png'
   }
+  */
 ];
 
 export function getRandomRoom(): FartRoom {
