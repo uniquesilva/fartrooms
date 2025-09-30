@@ -9,6 +9,7 @@ interface Message {
   username: string;
   isAI: boolean;
   isAiChat?: boolean;
+  isGlobal?: boolean; // Added for gas meter tracking
   timestamp: Date;
   roomId: string;
   replyTo?: string;
@@ -50,16 +51,19 @@ export function useSocket(roomId: string) {
       setMemberCount(info.memberCount);
     });
 
-    newSocket.on('new-user-message', (message: Message) => {
-      setUserMessages(prev => [...prev, message]);
-    });
+        newSocket.on('new-user-message', (message: Message) => {
+          // Only add to chat if it's not a global message for gas meter
+          if (!message.isGlobal) {
+            setUserMessages(prev => [...prev, message]);
+          }
+        });
 
-    newSocket.on('new-ai-message', (message: Message) => {
-      // Only add to AI messages if it's an AI chat message
-      if (message.isAiChat || message.isAI) {
-        setAiMessages(prev => [...prev, message]);
-      }
-    });
+        newSocket.on('new-ai-message', (message: Message) => {
+          // Only add to AI messages if it's an AI chat message and not global
+          if ((message.isAiChat || message.isAI) && !message.isGlobal) {
+            setAiMessages(prev => [...prev, message]);
+          }
+        });
 
     newSocket.on('user-joined', (data: { username: string; memberCount: number }) => {
       setMemberCount(data.memberCount);

@@ -203,8 +203,8 @@ app.prepare().then(async () => {
           // Broadcast to room
           io.to(data.roomId).emit('new-user-message', message);
           
-          // Broadcast to ALL clients for gas meter tracking
-          io.emit('new-user-message', message);
+          // Broadcast to ALL clients for gas meter tracking (with global flag)
+          io.emit('new-user-message', { ...message, isGlobal: true });
         });
 
     // User sends a message to AI
@@ -234,8 +234,8 @@ app.prepare().then(async () => {
           // Broadcast user message to AI chat only (this is a user question for AI)
           io.to(data.roomId).emit('new-ai-message', userMessage);
           
-          // Broadcast to ALL clients for gas meter tracking
-          io.emit('new-ai-message', userMessage);
+          // Broadcast to ALL clients for gas meter tracking (with global flag)
+          io.emit('new-ai-message', { ...userMessage, isGlobal: true });
 
       // Get AI response from OpenAI API
       try {
@@ -369,8 +369,8 @@ app.prepare().then(async () => {
         roomMessages.get(data.roomId).push(aiMessage);
         io.to(data.roomId).emit('new-ai-message', aiMessage);
         
-        // Broadcast to ALL clients for gas meter tracking
-        io.emit('new-ai-message', aiMessage);
+        // Broadcast to ALL clients for gas meter tracking (with global flag)
+        io.emit('new-ai-message', { ...aiMessage, isGlobal: true });
       } catch (error) {
         console.error('AI Chat error:', error);
         console.error('Error details:', {
@@ -395,8 +395,8 @@ app.prepare().then(async () => {
         roomMessages.get(data.roomId).push(aiMessage);
         io.to(data.roomId).emit('new-ai-message', aiMessage);
         
-        // Broadcast to ALL clients for gas meter tracking
-        io.emit('new-ai-message', aiMessage);
+        // Broadcast to ALL clients for gas meter tracking (with global flag)
+        io.emit('new-ai-message', { ...aiMessage, isGlobal: true });
       }
     });
 
