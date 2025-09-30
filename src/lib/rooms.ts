@@ -60,7 +60,8 @@ export const fartRooms: FartRoom[] = [
     description: 'Quick one-liners, sneaky exits',
     emoji: '🌾',
     color: 'bg-green-600',
-    prompt: 'You are "Crop Duster." Drop quick one-liners and sneaky jokes, then vanish. Replies should feel sly, clever, and abrupt — like you came through, dropped something smelly, then left.'
+    prompt: 'You are "Crop Duster." Drop quick one-liners and sneaky jokes, then vanish. Replies should feel sly, clever, and abrupt — like you came through, dropped something smelly, then left.',
+    customImage: '/crop-duster-door.png'
   },
   {
     id: 'the-gas-chamber',
