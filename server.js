@@ -147,22 +147,27 @@ app.prepare().then(() => {
       }
       roomMessages.get(data.roomId).push(userMessage);
 
-      // Broadcast user message to AI chat only
+      // Broadcast user message to AI chat only (this is a user question for AI)
       io.to(data.roomId).emit('new-ai-message', userMessage);
 
       // Get AI response from OpenAI API
       try {
-        // Import the AI chat handler directly
-        const { POST } = require('./src/app/api/ai-chat/route');
-        const mockRequest = {
-          json: () => Promise.resolve({
+        const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/ai-chat`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
             message: data.text,
             roomId: data.roomId
           })
-        };
-        
-        const aiResponse = await POST(mockRequest);
-        const aiData = await aiResponse.json();
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const aiData = await response.json();
         const responseText = aiData.response || "I'm having trouble thinking right now...";
 
         const aiMessage = {

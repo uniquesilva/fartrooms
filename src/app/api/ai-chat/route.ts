@@ -19,6 +19,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Room not found' }, { status: 404 });
     }
 
+    console.log('AI Chat API called:', { message, roomId, roomName: room.name, prompt: room.prompt });
+
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [

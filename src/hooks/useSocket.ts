@@ -55,7 +55,10 @@ export function useSocket(roomId: string) {
     });
 
     newSocket.on('new-ai-message', (message: Message) => {
-      setAiMessages(prev => [...prev, message]);
+      // Only add to AI messages if it's an AI chat message
+      if (message.isAiChat || message.isAI) {
+        setAiMessages(prev => [...prev, message]);
+      }
     });
 
     newSocket.on('user-joined', (data: { username: string; memberCount: number }) => {
