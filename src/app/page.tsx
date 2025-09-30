@@ -54,7 +54,7 @@ export default function Home() {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-red-900 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 p-4">
       <BackgroundAudio enabled={audioEnabled} />
       {/* Header */}
       <motion.div 
@@ -145,7 +145,7 @@ export default function Home() {
               whileTap={{ scale: 0.95 }}
             >
               <Link href={`/room/${room.id}`}>
-                <div className={`${room.color} p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-white/20`}>
+                <div className="bg-gray-800 p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-gray-700 hover:border-gray-500">
                   <div className="text-center">
                     {room.customImage ? (
                       <div className="mb-3 flex justify-center">

@@ -67,7 +67,7 @@ export default function RoomPage() {
   }
 
   return (
-    <div className={`min-h-screen ${room.color} p-4 relative`}>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 p-4 relative">
       <BackgroundAudio enabled={audioEnabled} />
       {showFartBubble && (
         <FartBubble onComplete={() => setShowFartBubble(false)} />
@@ -146,8 +146,8 @@ export default function RoomPage() {
                 <div
                   className={`inline-block max-w-xs md:max-w-md px-4 py-2 rounded-2xl ${
                     message.isAI
-                      ? 'bg-white/20 text-white'
-                      : 'bg-blue-500 text-white ml-auto'
+                      ? 'bg-gray-800 text-white border border-gray-700'
+                      : 'bg-gray-700 text-white ml-auto border border-gray-600'
                   }`}
                 >
                   <p className="text-xs opacity-70 mb-1">
@@ -174,13 +174,13 @@ export default function RoomPage() {
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder={`Chat with ${room.name}...`}
-            className="flex-1 bg-white/20 backdrop-blur-sm text-white placeholder-gray-300 px-4 py-3 rounded-2xl border border-white/20 focus:outline-none focus:border-white/40"
+            className="flex-1 bg-gray-800 text-white placeholder-gray-400 px-4 py-3 rounded-2xl border border-gray-700 focus:outline-none focus:border-gray-500"
             disabled={!isConnected}
           />
           <button
             onClick={handleSendMessage}
             disabled={!input.trim() || !isConnected}
-            className="bg-white/20 hover:bg-white/30 disabled:bg-white/10 text-white px-6 py-3 rounded-2xl transition-colors flex items-center gap-2"
+            className="bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 text-white px-6 py-3 rounded-2xl transition-colors flex items-center gap-2 border border-gray-600"
           >
             <Send className="w-5 h-5" />
           </button>
