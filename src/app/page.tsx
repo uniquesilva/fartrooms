@@ -69,10 +69,6 @@ export default function Home() {
             width={120}
             height={120}
             className="rounded-full"
-            style={{
-              filter: 'hue-rotate(180deg) saturate(0) brightness(0)',
-              clipPath: 'polygon(0% 0%, 50% 0%, 50% 100%, 0% 100%)'
-            }}
           />
           <h1 className="text-6xl md:text-8xl font-bold text-white">
             🌬️ Fart Rooms
