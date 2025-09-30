@@ -24,7 +24,9 @@ export function useSocket(roomId: string) {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000');
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 
+                     (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+    const newSocket = io(socketUrl);
     
     newSocket.on('connect', () => {
       setIsConnected(true);

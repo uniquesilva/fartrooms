@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getRoomById, fartRooms } from '@/lib/rooms';
 import { ArrowLeft, Send, Shuffle, Volume2, VolumeX, Users } from 'lucide-react';
@@ -108,9 +109,18 @@ export default function RoomPage() {
 
         {/* Room Title */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-2">
-            {room.emoji} {room.name}
-          </h1>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <Image
+              src="/logo.png"
+              alt="Fart Rooms Logo"
+              width={50}
+              height={50}
+              className="rounded-full"
+            />
+            <h1 className="text-4xl md:text-6xl font-bold text-white">
+              {room.emoji} {room.name}
+            </h1>
+          </div>
           <p className="text-xl text-gray-200 mb-4">{room.description}</p>
           <div className="flex items-center justify-center gap-4 text-white/80">
             <div className="flex items-center gap-2">

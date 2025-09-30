@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { fartRooms, getRandomRoom } from '@/lib/rooms';
 import { Shuffle, Volume2, VolumeX, Users } from 'lucide-react';
@@ -41,9 +42,18 @@ export default function Home() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-12"
       >
-        <h1 className="text-6xl md:text-8xl font-bold text-white mb-4">
-          🌬️ Fart Rooms
-        </h1>
+        <div className="flex items-center justify-center gap-4 mb-6">
+          <Image
+            src="/logo.png"
+            alt="Fart Rooms Logo"
+            width={80}
+            height={80}
+            className="rounded-full"
+          />
+          <h1 className="text-6xl md:text-8xl font-bold text-white">
+            🌬️ Fart Rooms
+          </h1>
+        </div>
         <p className="text-xl md:text-2xl text-pink-200 mb-8">
           Enter the most ridiculous AI chatrooms on the internet
         </p>
