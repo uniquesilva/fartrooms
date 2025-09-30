@@ -147,11 +147,24 @@ app.prepare().then(() => {
       roomMessages.get(data.roomId).push(userMessage);
 
       // Broadcast user message to room
-      io.to(data.roomId).emit('new-user-message', userMessage);
+      io.to(data.roomId).emit('new-ai-message', userMessage);
 
-      // Simple AI response (you can enhance this with OpenAI API)
-      setTimeout(() => {
-        const aiResponse = `AI: ${data.text}... but with more fart energy! 💨`;
+      // Get AI response from OpenAI API
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/ai-chat`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message: data.text,
+            roomId: data.roomId
+          })
+        });
+
+        const aiData = await response.json();
+        const aiResponse = aiData.response || "I'm having trouble thinking right now...";
+
         const aiMessage = {
           id: (Date.now() + 1).toString(),
           text: aiResponse,
@@ -163,7 +176,20 @@ app.prepare().then(() => {
 
         roomMessages.get(data.roomId).push(aiMessage);
         io.to(data.roomId).emit('new-ai-message', aiMessage);
-      }, 1000);
+      } catch (error) {
+        console.error('AI Chat error:', error);
+        const aiMessage = {
+          id: (Date.now() + 1).toString(),
+          text: "I'm having trouble thinking right now...",
+          username: 'AI',
+          isAI: true,
+          timestamp: new Date(),
+          roomId: data.roomId
+        };
+
+        roomMessages.get(data.roomId).push(aiMessage);
+        io.to(data.roomId).emit('new-ai-message', aiMessage);
+      }
     });
 
     // User leaves
