@@ -2,6 +2,7 @@ const { createServer } = require('http');
 const { parse } = require('url');
 const next = require('next');
 const { Server } = require('socket.io');
+const { MongoClient } = require('mongodb');
 
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = 'localhost';
@@ -13,6 +14,74 @@ const handle = app.getRequestHandler();
 // Store active users and messages in memory
 const activeUsers = new Map();
 const roomMessages = new Map();
+
+// MongoDB connection
+let mongoClient;
+let db;
+
+async function connectToMongoDB() {
+  try {
+    mongoClient = new MongoClient(process.env.MONGO_URL);
+    await mongoClient.connect();
+    db = mongoClient.db('fartrooms');
+    console.log('Connected to MongoDB');
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+  }
+}
+
+async function saveMessage(message) {
+  try {
+    if (!db) return;
+    
+    const messagesCollection = db.collection('messages');
+    await messagesCollection.insertOne({
+      ...message,
+      timestamp: new Date(message.timestamp)
+    });
+    
+    // Keep only last 50 user messages and 10 AI messages per room
+    const userMessages = await messagesCollection
+      .find({ roomId: message.roomId, isAI: false })
+      .sort({ timestamp: -1 })
+      .limit(50)
+      .toArray();
+    
+    const aiMessages = await messagesCollection
+      .find({ roomId: message.roomId, isAI: true })
+      .sort({ timestamp: -1 })
+      .limit(10)
+      .toArray();
+    
+    // Delete older messages
+    const keepIds = [...userMessages, ...aiMessages].map(m => m._id);
+    await messagesCollection.deleteMany({
+      roomId: message.roomId,
+      _id: { $nin: keepIds }
+    });
+    
+  } catch (error) {
+    console.error('Error saving message to MongoDB:', error);
+  }
+}
+
+async function getRecentMessages(roomId) {
+  try {
+    if (!db) return [];
+    
+    const messagesCollection = db.collection('messages');
+    const messages = await messagesCollection
+      .find({ roomId })
+      .sort({ timestamp: -1 })
+      .limit(60) // 50 user + 10 AI
+      .toArray();
+    
+    return messages.reverse(); // Return in chronological order
+  } catch (error) {
+    console.error('Error fetching messages from MongoDB:', error);
+    return [];
+  }
+}
 
 // Simple username generator
 const fartAdjectives = ['Silent', 'Loud', 'Wet', 'Dry', 'Stinky', 'Fresh', 'Hot', 'Cold', 'Quick', 'Slow', 'Big', 'Small', 'Mysterious', 'Obvious', 'Sneaky', 'Bold', 'Shy', 'Angry', 'Happy', 'Sad', 'Excited', 'Calm'];
@@ -45,7 +114,10 @@ function updateRoomMemberCounts() {
   });
 }
 
-app.prepare().then(() => {
+app.prepare().then(async () => {
+  // Connect to MongoDB
+  await connectToMongoDB();
+  
   const server = createServer(handle);
   const io = new Server(server, {
     cors: {
@@ -80,10 +152,13 @@ app.prepare().then(() => {
       });
 
       // Send current room members to the new user
-      socket.emit('room-info', {
-        memberCount: getRoomMemberCount(data.roomId),
-        recentMessages: roomMessages.get(data.roomId) || []
-      });
+        // Load recent messages from MongoDB
+        const recentMessages = await getRecentMessages(data.roomId);
+        
+        socket.emit('room-info', {
+          memberCount: getRoomMemberCount(data.roomId),
+          recentMessages: recentMessages
+        });
       
       // Broadcast updated member counts to all clients
       const countsObject = Object.fromEntries(roomMemberCounts);
@@ -100,31 +175,37 @@ app.prepare().then(() => {
       console.log(`${username} joined room ${data.roomId}`);
     });
 
-    // User sends a message to other users
-    socket.on('send-user-message', async (data) => {
-      const user = activeUsers.get(socket.id);
-      if (!user) return;
+        // User sends a message to other users
+        socket.on('send-user-message', async (data) => {
+          const user = activeUsers.get(socket.id);
+          if (!user) return;
 
-      const message = {
-        id: Date.now().toString(),
-        text: data.text,
-        username: user.username,
-        isAI: false,
-        timestamp: new Date(),
-        roomId: data.roomId,
-        replyTo: data.replyTo,
-        replyToUsername: data.replyToUsername
-      };
+          const message = {
+            id: Date.now().toString(),
+            text: data.text,
+            username: user.username,
+            isAI: false,
+            timestamp: new Date(),
+            roomId: data.roomId,
+            replyTo: data.replyTo,
+            replyToUsername: data.replyToUsername
+          };
 
-      // Store message
-      if (!roomMessages.has(data.roomId)) {
-        roomMessages.set(data.roomId, []);
-      }
-      roomMessages.get(data.roomId).push(message);
+          // Save to MongoDB
+          await saveMessage(message);
 
-      // Broadcast to room
-      io.to(data.roomId).emit('new-user-message', message);
-    });
+          // Store in memory for immediate access
+          if (!roomMessages.has(data.roomId)) {
+            roomMessages.set(data.roomId, []);
+          }
+          roomMessages.get(data.roomId).push(message);
+
+          // Broadcast to room
+          io.to(data.roomId).emit('new-user-message', message);
+          
+          // Broadcast to ALL clients for gas meter tracking
+          io.emit('new-user-message', message);
+        });
 
     // User sends a message to AI
     socket.on('send-ai-message', async (data) => {
@@ -141,14 +222,20 @@ app.prepare().then(() => {
         roomId: data.roomId
       };
 
-      // Store user message
-      if (!roomMessages.has(data.roomId)) {
-        roomMessages.set(data.roomId, []);
-      }
-      roomMessages.get(data.roomId).push(userMessage);
+          // Save user message to MongoDB
+          await saveMessage(userMessage);
 
-      // Broadcast user message to AI chat only (this is a user question for AI)
-      io.to(data.roomId).emit('new-ai-message', userMessage);
+          // Store in memory for immediate access
+          if (!roomMessages.has(data.roomId)) {
+            roomMessages.set(data.roomId, []);
+          }
+          roomMessages.get(data.roomId).push(userMessage);
+
+          // Broadcast user message to AI chat only (this is a user question for AI)
+          io.to(data.roomId).emit('new-ai-message', userMessage);
+          
+          // Broadcast to ALL clients for gas meter tracking
+          io.emit('new-ai-message', userMessage);
 
       // Get AI response from OpenAI API
       try {
@@ -276,8 +363,14 @@ app.prepare().then(() => {
           roomId: data.roomId
         };
 
+        // Save AI response to MongoDB
+        await saveMessage(aiMessage);
+        
         roomMessages.get(data.roomId).push(aiMessage);
         io.to(data.roomId).emit('new-ai-message', aiMessage);
+        
+        // Broadcast to ALL clients for gas meter tracking
+        io.emit('new-ai-message', aiMessage);
       } catch (error) {
         console.error('AI Chat error:', error);
         console.error('Error details:', {
@@ -296,8 +389,14 @@ app.prepare().then(() => {
           roomId: data.roomId
         };
 
+        // Save error message to MongoDB
+        await saveMessage(aiMessage);
+        
         roomMessages.get(data.roomId).push(aiMessage);
         io.to(data.roomId).emit('new-ai-message', aiMessage);
+        
+        // Broadcast to ALL clients for gas meter tracking
+        io.emit('new-ai-message', aiMessage);
       }
     });
 

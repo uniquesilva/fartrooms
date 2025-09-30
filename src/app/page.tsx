@@ -31,12 +31,14 @@ export default function Home() {
       );
     });
 
-    // Listen for new messages to update gas meter
-    socket.on('new-user-message', () => {
+    // Listen for new messages to update gas meter (global broadcasts)
+    socket.on('new-user-message', (message) => {
+      console.log('Global user message received for gas meter:', message);
       setTotalMessages(prev => prev + 1);
     });
 
-    socket.on('new-ai-message', () => {
+    socket.on('new-ai-message', (message) => {
+      console.log('Global AI message received for gas meter:', message);
       setTotalMessages(prev => prev + 1);
     });
 
