@@ -198,9 +198,16 @@ app.prepare().then(() => {
         io.to(data.roomId).emit('new-ai-message', aiMessage);
       } catch (error) {
         console.error('AI Chat error:', error);
+        console.error('Error details:', {
+          message: error.message,
+          stack: error.stack,
+          roomId: data.roomId,
+          hasApiKey: !!process.env.OPENAI_API_KEY
+        });
+        
         const aiMessage = {
           id: (Date.now() + 1).toString(),
-          text: "I'm having trouble thinking right now...",
+          text: `Error: ${error.message}`,
           username: 'AI',
           isAI: true,
           timestamp: new Date(),
