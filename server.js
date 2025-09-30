@@ -31,6 +31,20 @@ function getRoomMemberCount(roomId) {
   return Array.from(activeUsers.values()).filter(user => user.roomId === roomId).length;
 }
 
+// Store room member counts for API access
+const roomMemberCounts = new Map();
+
+function updateRoomMemberCounts() {
+  // Clear all counts
+  roomMemberCounts.clear();
+  
+  // Count members in each room
+  activeUsers.forEach(user => {
+    const currentCount = roomMemberCounts.get(user.roomId) || 0;
+    roomMemberCounts.set(user.roomId, currentCount + 1);
+  });
+}
+
 app.prepare().then(() => {
   const server = createServer(handle);
   const io = new Server(server, {
@@ -55,6 +69,9 @@ app.prepare().then(() => {
 
       activeUsers.set(socket.id, user);
       socket.join(data.roomId);
+      
+      // Update member counts
+      updateRoomMemberCounts();
 
       // Notify room about new user
       socket.to(data.roomId).emit('user-joined', {
@@ -67,6 +84,18 @@ app.prepare().then(() => {
         memberCount: getRoomMemberCount(data.roomId),
         recentMessages: roomMessages.get(data.roomId) || []
       });
+      
+      // Broadcast updated member counts to all clients
+      const countsObject = Object.fromEntries(roomMemberCounts);
+      io.emit('room-counts-updated', countsObject);
+      
+      // Update API endpoint (if available)
+      try {
+        const { updateRoomCounts } = require('./src/app/api/room-counts/route');
+        updateRoomCounts(countsObject);
+      } catch (error) {
+        // API route not available in server context, that's okay
+      }
 
       console.log(`${username} joined room ${data.roomId}`);
     });
@@ -120,6 +149,22 @@ app.prepare().then(() => {
           memberCount: getRoomMemberCount(user.roomId) - 1
         });
         activeUsers.delete(socket.id);
+        
+        // Update member counts
+        updateRoomMemberCounts();
+        
+        // Broadcast updated member counts to all clients
+        const countsObject = Object.fromEntries(roomMemberCounts);
+        io.emit('room-counts-updated', countsObject);
+        
+        // Update API endpoint (if available)
+        try {
+          const { updateRoomCounts } = require('./src/app/api/room-counts/route');
+          updateRoomCounts(countsObject);
+        } catch (error) {
+          // API route not available in server context, that's okay
+        }
+        
         console.log(`${user.username} left room ${user.roomId}`);
       }
     });

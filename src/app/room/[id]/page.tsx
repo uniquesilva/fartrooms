@@ -113,9 +113,13 @@ export default function RoomPage() {
             <Image
               src="/logo.png"
               alt="Fart Rooms Logo"
-              width={50}
-              height={50}
+              width={80}
+              height={80}
               className="rounded-full"
+              style={{
+                filter: 'hue-rotate(180deg) saturate(0) brightness(0)',
+                clipPath: 'polygon(0% 0%, 50% 0%, 50% 100%, 0% 100%)'
+              }}
             />
             <h1 className="text-4xl md:text-6xl font-bold text-white">
               {room.emoji} {room.name}

@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { fartRooms, getRandomRoom } from '@/lib/rooms';
 import { Shuffle, Volume2, VolumeX, Users } from 'lucide-react';
 import BackgroundAudio from '@/components/BackgroundAudio';
-import { generateRoomMemberCount } from '@/lib/usernames';
+import { io } from 'socket.io-client';
 
 export default function Home() {
   const [randomRoom, setRandomRoom] = useState(getRandomRoom());
@@ -15,21 +15,41 @@ export default function Home() {
   const [roomsWithMembers, setRoomsWithMembers] = useState(fartRooms);
 
   useEffect(() => {
-    // Simulate real-time member counts
-    const updateMemberCounts = () => {
+    // Connect to Socket.IO for real-time member counts
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 
+                     (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+    const socket = io(socketUrl);
+
+    socket.on('room-counts-updated', (counts: Record<string, number>) => {
       setRoomsWithMembers(prevRooms => 
         prevRooms.map(room => ({
           ...room,
-          memberCount: generateRoomMemberCount()
+          memberCount: counts[room.id] || 0
         }))
       );
+    });
+
+    // Fetch initial counts
+    const fetchInitialCounts = async () => {
+      try {
+        const response = await fetch('/api/room-counts');
+        const counts = await response.json();
+        setRoomsWithMembers(prevRooms => 
+          prevRooms.map(room => ({
+            ...room,
+            memberCount: counts[room.id] || 0
+          }))
+        );
+      } catch (error) {
+        console.error('Failed to fetch room counts:', error);
+      }
     };
 
-    // Update member counts every 30 seconds
-    const interval = setInterval(updateMemberCounts, 30000);
-    updateMemberCounts(); // Initial load
+    fetchInitialCounts();
 
-    return () => clearInterval(interval);
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
 
@@ -46,9 +66,13 @@ export default function Home() {
           <Image
             src="/logo.png"
             alt="Fart Rooms Logo"
-            width={80}
-            height={80}
+            width={120}
+            height={120}
             className="rounded-full"
+            style={{
+              filter: 'hue-rotate(180deg) saturate(0) brightness(0)',
+              clipPath: 'polygon(0% 0%, 50% 0%, 50% 100%, 0% 100%)'
+            }}
           />
           <h1 className="text-6xl md:text-8xl font-bold text-white">
             🌬️ Fart Rooms
