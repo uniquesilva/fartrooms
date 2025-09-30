@@ -152,23 +152,38 @@ app.prepare().then(() => {
 
       // Get AI response from OpenAI API
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/ai-chat`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            message: data.text,
-            roomId: data.roomId
-          })
+        // Import OpenAI directly in server.js
+        const OpenAI = require('openai');
+        const { getRoomById } = require('./src/lib/rooms');
+        
+        const openai = new OpenAI({
+          apiKey: process.env.OPENAI_API_KEY,
         });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        const room = getRoomById(data.roomId);
+        if (!room) {
+          throw new Error('Room not found');
         }
 
-        const aiData = await response.json();
-        const responseText = aiData.response || "I'm having trouble thinking right now...";
+        console.log('AI Chat API called:', { message: data.text, roomId: data.roomId, roomName: room.name });
+
+        const completion = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [
+            {
+              role: "system",
+              content: room.prompt
+            },
+            {
+              role: "user",
+              content: data.text
+            }
+          ],
+          max_tokens: 150,
+          temperature: 0.8,
+        });
+
+        const responseText = completion.choices[0]?.message?.content || "I'm having trouble thinking right now...";
 
         const aiMessage = {
           id: (Date.now() + 1).toString(),
