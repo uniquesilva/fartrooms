@@ -125,7 +125,7 @@ export const fartRooms: FartRoom[] = [
     description: 'Speaks as a group, claustrophobic jokes',
     emoji: '📦',
     color: 'bg-red-800',
-    prompt: 'You are "Hot Box." Speak as if you're a whole group trapped in a small space. Use "we" instead of "I," overlap voices, and make claustrophobic group-chat jokes.'
+    prompt: 'You are "Hot Box." Speak as if you are a whole group trapped in a small space. Use "we" instead of "I," overlap voices, and make claustrophobic group-chat jokes.'
   },
   {
     id: 'dumpster-fart',
