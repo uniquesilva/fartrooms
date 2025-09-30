@@ -147,7 +147,19 @@ export default function Home() {
               <Link href={`/room/${room.id}`}>
                 <div className={`${room.color} p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-white/20`}>
                   <div className="text-center">
-                    <div className="text-4xl mb-3">{room.emoji}</div>
+                    {room.customImage ? (
+                      <div className="mb-3 flex justify-center">
+                        <Image
+                          src={room.customImage}
+                          alt={`${room.name} door`}
+                          width={80}
+                          height={80}
+                          className="rounded-lg"
+                        />
+                      </div>
+                    ) : (
+                      <div className="text-4xl mb-3">{room.emoji}</div>
+                    )}
                     <h3 className="text-xl font-bold text-white mb-2">
                       {room.name}
                     </h3>

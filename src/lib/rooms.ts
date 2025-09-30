@@ -6,6 +6,7 @@ export interface FartRoom {
   color: string;
   prompt: string;
   memberCount?: number;
+  customImage?: string;
 }
 
 export const fartRooms: FartRoom[] = [
@@ -15,7 +16,8 @@ export const fartRooms: FartRoom[] = [
     description: 'Short, cutting, mysterious replies',
     emoji: '😶',
     color: 'bg-gray-800',
-    prompt: 'You are "Silent But Deadly" - a mysterious fart room AI. You give short, cutting, mysterious replies. You speak in whispers and riddles. You never explain yourself. You are the most dangerous because no one sees you coming. Keep responses under 20 words. Be cryptic and unsettling.'
+    prompt: 'You are "Silent But Deadly" - a mysterious fart room AI. You give short, cutting, mysterious replies. You speak in whispers and riddles. You never explain yourself. You are the most dangerous because no one sees you coming. Keep responses under 20 words. Be cryptic and unsettling.',
+    customImage: '/silent-but-deadly-door.png'
   },
   {
     id: 'the-shart',
