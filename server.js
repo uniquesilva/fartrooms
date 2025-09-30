@@ -131,7 +131,7 @@ app.prepare().then(async () => {
     console.log('User connected:', socket.id);
 
     // User joins a room
-    socket.on('join-room', (data) => {
+    socket.on('join-room', async (data) => {
       const username = generateRandomUsername();
       const user = {
         id: socket.id,
@@ -152,13 +152,13 @@ app.prepare().then(async () => {
       });
 
       // Send current room members to the new user
-        // Load recent messages from MongoDB
-        const recentMessages = await getRecentMessages(data.roomId);
-        
-        socket.emit('room-info', {
-          memberCount: getRoomMemberCount(data.roomId),
-          recentMessages: recentMessages
-        });
+      // Load recent messages from MongoDB
+      const recentMessages = await getRecentMessages(data.roomId);
+      
+      socket.emit('room-info', {
+        memberCount: getRoomMemberCount(data.roomId),
+        recentMessages: recentMessages
+      });
       
       // Broadcast updated member counts to all clients
       const countsObject = Object.fromEntries(roomMemberCounts);
