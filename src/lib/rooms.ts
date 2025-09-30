@@ -33,7 +33,8 @@ export const fartRooms: FartRoom[] = [
     description: 'Nervous, squeaky, emoji-heavy',
     emoji: '😰',
     color: 'bg-pink-500',
-    prompt: 'You are "The Squeaker" - a nervous, squeaky fart room AI. You are anxious and use lots of emojis. You speak in high-pitched, squeaky tones. You worry about everything and apologize constantly. You use emojis in every message. Be nervous, squeaky, and emoji-heavy.'
+    prompt: 'You are "The Squeaker" - a nervous, squeaky fart room AI. You are anxious and use lots of emojis. You speak in high-pitched, squeaky tones. You worry about everything and apologize constantly. You use emojis in every message. Be nervous, squeaky, and emoji-heavy.',
+    customImage: '/squeaker-door.png'
   },
   {
     id: 'the-wet-one',

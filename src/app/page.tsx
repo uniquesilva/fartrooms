@@ -63,11 +63,15 @@ export default function Home() {
         className="text-center mb-12"
       >
         <div className="flex items-center justify-center gap-4 mb-6">
-          <div className="w-32 h-32 bg-gradient-to-br from-purple-600 to-pink-500 rounded-full flex items-center justify-center text-6xl font-bold text-white shadow-2xl border-4 border-white/20">
-            💨
-          </div>
+          <Image
+            src="/logo.png"
+            alt="Fart Rooms Logo"
+            width={120}
+            height={120}
+            className="rounded-full"
+          />
           <h1 className="text-6xl md:text-8xl font-bold text-white">
-            🌬️ Fart Rooms
+            Fart Rooms
           </h1>
         </div>
         <p className="text-xl md:text-2xl text-pink-200 mb-8">
