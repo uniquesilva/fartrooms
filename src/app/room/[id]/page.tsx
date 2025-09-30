@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getRoomById, fartRooms } from '@/lib/rooms';
 import { ArrowLeft, Send, Shuffle, Volume2, VolumeX } from 'lucide-react';
 import FartBubble from '@/components/FartBubble';
+import BackgroundAudio from '@/components/BackgroundAudio';
 
 interface Message {
   id: string;
@@ -22,6 +23,7 @@ export default function RoomPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [showFartBubble, setShowFartBubble] = useState(false);
+  const [audioEnabled, setAudioEnabled] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const room = getRoomById(params.id as string);
@@ -118,6 +120,7 @@ export default function RoomPage() {
 
   return (
     <div className={`min-h-screen ${room.color} p-4 relative`}>
+      <BackgroundAudio enabled={audioEnabled} />
       {showFartBubble && (
         <FartBubble onComplete={() => setShowFartBubble(false)} />
       )}
@@ -138,6 +141,13 @@ export default function RoomPage() {
               className="text-white hover:text-gray-200 transition-colors"
             >
               {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+            </button>
+            <button
+              onClick={() => setAudioEnabled(!audioEnabled)}
+              className={`${audioEnabled ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-600 hover:bg-gray-700'} text-white px-4 py-2 rounded-full transition-colors flex items-center gap-2`}
+            >
+              {audioEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+              {audioEnabled ? 'Music On' : 'Music Off'}
             </button>
             <button
               onClick={getRandomRoom}

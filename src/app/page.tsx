@@ -4,14 +4,17 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { fartRooms, getRandomRoom } from '@/lib/rooms';
-import { Shuffle } from 'lucide-react';
+import { Shuffle, Volume2, VolumeX } from 'lucide-react';
+import BackgroundAudio from '@/components/BackgroundAudio';
 
 export default function Home() {
   const [randomRoom, setRandomRoom] = useState(getRandomRoom());
+  const [audioEnabled, setAudioEnabled] = useState(false);
 
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-red-900 p-4">
+      <BackgroundAudio enabled={audioEnabled} />
       {/* Header */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
@@ -41,6 +44,13 @@ export default function Home() {
           >
             Join Telegram
           </a>
+          <button
+            onClick={() => setAudioEnabled(!audioEnabled)}
+            className={`${audioEnabled ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-600 hover:bg-gray-700'} text-white px-6 py-3 rounded-full transition-colors flex items-center gap-2`}
+          >
+            {audioEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+            {audioEnabled ? 'Sound On' : 'Sound Off'}
+          </button>
         </div>
       </motion.div>
 
