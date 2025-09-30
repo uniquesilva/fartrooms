@@ -69,6 +69,10 @@ export default function Home() {
             width={120}
             height={120}
             className="rounded-full"
+            style={{
+              clipPath: 'polygon(0% 0%, 30% 0%, 30% 100%, 0% 100%)',
+              objectFit: 'cover'
+            }}
           />
           <h1 className="text-6xl md:text-8xl font-bold text-white">
             🌬️ Fart Rooms
