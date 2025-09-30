@@ -4,102 +4,49 @@ import { useState, useRef, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getRoomById, fartRooms } from '@/lib/rooms';
-import { ArrowLeft, Send, Shuffle, Volume2, VolumeX } from 'lucide-react';
+import { ArrowLeft, Send, Shuffle, Volume2, VolumeX, Users } from 'lucide-react';
 import FartBubble from '@/components/FartBubble';
 import BackgroundAudio from '@/components/BackgroundAudio';
+import { useSocket } from '@/hooks/useSocket';
 
 interface Message {
   id: string;
   text: string;
-  isUser: boolean;
+  username: string;
+  isAI: boolean;
   timestamp: Date;
+  roomId: string;
 }
 
 export default function RoomPage() {
   const params = useParams();
   const router = useRouter();
-  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [showFartBubble, setShowFartBubble] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const room = getRoomById(params.id as string);
+  const { messages, memberCount, isConnected, sendMessage } = useSocket(params.id as string);
 
   useEffect(() => {
     if (!room) {
       router.push('/');
       return;
     }
-
-    // Add welcome message
-    const welcomeMessage: Message = {
-      id: 'welcome',
-      text: `Welcome to ${room.name}! ${room.emoji} ${room.description}`,
-      isUser: false,
-      timestamp: new Date()
-    };
-    setMessages([welcomeMessage]);
   }, [room, router]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+  const handleSendMessage = () => {
+    if (!input.trim() || !isConnected) return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      text: input,
-      isUser: true,
-      timestamp: new Date()
-    };
-
-    setMessages(prev => [...prev, userMessage]);
+    sendMessage(input);
     setInput('');
-    setIsLoading(true);
     setShowFartBubble(true);
-
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: input,
-          roomId: room?.id
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        const aiMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          text: data.response,
-          isUser: false,
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, aiMessage]);
-      } else {
-        throw new Error(data.error);
-      }
-    } catch (error) {
-      console.error('Error sending message:', error);
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: "Sorry, I'm having a gas problem right now... Try again!",
-        isUser: false,
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -164,7 +111,15 @@ export default function RoomPage() {
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-2">
             {room.emoji} {room.name}
           </h1>
-          <p className="text-xl text-gray-200">{room.description}</p>
+          <p className="text-xl text-gray-200 mb-4">{room.description}</p>
+          <div className="flex items-center justify-center gap-4 text-white/80">
+            <div className="flex items-center gap-2">
+              <Users className="w-5 h-5" />
+              <span>{memberCount} farting</span>
+            </div>
+            <div className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+            <span className="text-sm">{isConnected ? 'Connected' : 'Connecting...'}</span>
+          </div>
         </div>
 
         {/* Messages */}
@@ -176,39 +131,27 @@ export default function RoomPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className={`mb-4 ${message.isUser ? 'text-right' : 'text-left'}`}
+                className={`mb-4 ${message.isAI ? 'text-left' : 'text-right'}`}
               >
                 <div
                   className={`inline-block max-w-xs md:max-w-md px-4 py-2 rounded-2xl ${
-                    message.isUser
-                      ? 'bg-blue-500 text-white ml-auto'
-                      : 'bg-white/20 text-white'
+                    message.isAI
+                      ? 'bg-white/20 text-white'
+                      : 'bg-blue-500 text-white ml-auto'
                   }`}
                 >
+                  <p className="text-xs opacity-70 mb-1">
+                    {message.isAI ? 'AI' : message.username}
+                  </p>
                   <p className="text-sm">{message.text}</p>
                   <p className="text-xs opacity-70 mt-1">
-                    {message.timestamp.toLocaleTimeString()}
+                    {new Date(message.timestamp).toLocaleTimeString()}
                   </p>
                 </div>
               </motion.div>
             ))}
           </AnimatePresence>
           
-          {isLoading && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-left"
-            >
-              <div className="inline-block bg-white/20 text-white px-4 py-2 rounded-2xl">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-white rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                </div>
-              </div>
-            </motion.div>
-          )}
           
           <div ref={messagesEndRef} />
         </div>
@@ -222,11 +165,11 @@ export default function RoomPage() {
             onKeyPress={handleKeyPress}
             placeholder={`Chat with ${room.name}...`}
             className="flex-1 bg-white/20 backdrop-blur-sm text-white placeholder-gray-300 px-4 py-3 rounded-2xl border border-white/20 focus:outline-none focus:border-white/40"
-            disabled={isLoading}
+            disabled={!isConnected}
           />
           <button
             onClick={handleSendMessage}
-            disabled={!input.trim() || isLoading}
+            disabled={!input.trim() || !isConnected}
             className="bg-white/20 hover:bg-white/30 disabled:bg-white/10 text-white px-6 py-3 rounded-2xl transition-colors flex items-center gap-2"
           >
             <Send className="w-5 h-5" />

@@ -1,15 +1,35 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { fartRooms, getRandomRoom } from '@/lib/rooms';
-import { Shuffle, Volume2, VolumeX } from 'lucide-react';
+import { Shuffle, Volume2, VolumeX, Users } from 'lucide-react';
 import BackgroundAudio from '@/components/BackgroundAudio';
+import { generateRoomMemberCount } from '@/lib/usernames';
 
 export default function Home() {
   const [randomRoom, setRandomRoom] = useState(getRandomRoom());
   const [audioEnabled, setAudioEnabled] = useState(false);
+  const [roomsWithMembers, setRoomsWithMembers] = useState(fartRooms);
+
+  useEffect(() => {
+    // Simulate real-time member counts
+    const updateMemberCounts = () => {
+      setRoomsWithMembers(prevRooms => 
+        prevRooms.map(room => ({
+          ...room,
+          memberCount: generateRoomMemberCount()
+        }))
+      );
+    };
+
+    // Update member counts every 30 seconds
+    const interval = setInterval(updateMemberCounts, 30000);
+    updateMemberCounts(); // Initial load
+
+    return () => clearInterval(interval);
+  }, []);
 
 
   return (
@@ -85,7 +105,7 @@ export default function Home() {
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {fartRooms.map((room, index) => (
+          {roomsWithMembers.map((room, index) => (
             <motion.div
               key={room.id}
               initial={{ opacity: 0, y: 20 }}
@@ -101,9 +121,13 @@ export default function Home() {
                     <h3 className="text-xl font-bold text-white mb-2">
                       {room.name}
                     </h3>
-                    <p className="text-gray-200 text-sm">
+                    <p className="text-gray-200 text-sm mb-3">
                       {room.description}
                     </p>
+                    <div className="flex items-center justify-center gap-2 text-white/80 text-sm">
+                      <Users className="w-4 h-4" />
+                      <span>{room.memberCount || 0} farting</span>
+                    </div>
                   </div>
                 </div>
               </Link>

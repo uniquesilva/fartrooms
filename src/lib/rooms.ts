@@ -5,6 +5,7 @@ export interface FartRoom {
   emoji: string;
   color: string;
   prompt: string;
+  memberCount?: number;
 }
 
 export const fartRooms: FartRoom[] = [
