@@ -2,6 +2,8 @@
 
 A meme-driven website where users can enter different fart-themed chatrooms, each powered by a unique AI persona. No login, no wallet, no signup — just click, chat, and laugh!
 
+> **Status**: ✅ Successfully connected to GitHub! Repository is live and ready for deployment.
+
 ## Features
 
 - **15 Unique AI Rooms**: Each with a distinct fart-themed personality
