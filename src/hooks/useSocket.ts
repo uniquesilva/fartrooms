@@ -8,6 +8,7 @@ interface Message {
   text: string;
   username: string;
   isAI: boolean;
+  isAiChat?: boolean;
   timestamp: Date;
   roomId: string;
   replyTo?: string;
@@ -41,8 +42,9 @@ export function useSocket(roomId: string) {
     });
 
     newSocket.on('room-info', (info: RoomInfo) => {
-      const userMsgs = info.recentMessages.filter(msg => !msg.isAI);
-      const aiMsgs = info.recentMessages.filter(msg => msg.isAI);
+      // Separate messages by chat type
+      const userMsgs = info.recentMessages.filter(msg => !msg.isAI && !msg.isAiChat);
+      const aiMsgs = info.recentMessages.filter(msg => msg.isAI || msg.isAiChat);
       setUserMessages(userMsgs);
       setAiMessages(aiMsgs);
       setMemberCount(info.memberCount);

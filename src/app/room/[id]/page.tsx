@@ -15,6 +15,7 @@ interface Message {
   text: string;
   username: string;
   isAI: boolean;
+  isAiChat?: boolean;
   timestamp: Date;
   roomId: string;
   replyTo?: string;
@@ -283,29 +284,36 @@ export default function RoomPage() {
             </h3>
             <div className="max-h-80 overflow-y-auto mb-4">
               <AnimatePresence>
-                {aiMessages.map((message) => (
-                  <motion.div
-                    key={message.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    className={`mb-4 ${message.isAI ? 'text-left' : 'text-right'}`}
-                  >
-                    <div className={`inline-block max-w-xs md:max-w-md px-4 py-2 rounded-2xl ${
-                      message.isAI
-                        ? 'bg-gray-800 text-white border border-gray-700'
-                        : 'bg-blue-600 text-white border border-blue-500 ml-auto'
-                    }`}>
-                      <p className="text-xs opacity-70 mb-1">
-                        {message.isAI ? 'AI' : 'You'}
-                      </p>
-                      <p className="text-sm">{message.text}</p>
-                      <p className="text-xs opacity-70 mt-1">
-                        {new Date(message.timestamp).toLocaleTimeString()}
-                      </p>
-                    </div>
-                  </motion.div>
-                ))}
+                {aiMessages.map((message, index) => {
+                  // Group user questions with AI responses
+                  const isUserMessage = !message.isAI;
+                  const nextMessage = aiMessages[index + 1];
+                  const isPairedWithAI = isUserMessage && nextMessage && nextMessage.isAI;
+                  
+                  return (
+                    <motion.div
+                      key={message.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      className={`mb-4 ${message.isAI ? 'text-left' : 'text-right'}`}
+                    >
+                      <div className={`inline-block max-w-xs md:max-w-md px-4 py-2 rounded-2xl ${
+                        message.isAI
+                          ? 'bg-gray-800 text-white border border-gray-700'
+                          : 'bg-blue-600 text-white border border-blue-500 ml-auto'
+                      }`}>
+                        <p className="text-xs opacity-70 mb-1">
+                          {message.isAI ? 'AI' : message.username}
+                        </p>
+                        <p className="text-sm">{message.text}</p>
+                        <p className="text-xs opacity-70 mt-1">
+                          {new Date(message.timestamp).toLocaleTimeString()}
+                        </p>
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </AnimatePresence>
               <div ref={aiMessagesEndRef} />
             </div>
