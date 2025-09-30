@@ -10,6 +10,8 @@ interface Message {
   isAI: boolean;
   timestamp: Date;
   roomId: string;
+  replyTo?: string;
+  replyToUsername?: string;
 }
 
 interface RoomInfo {
@@ -19,7 +21,8 @@ interface RoomInfo {
 
 export function useSocket(roomId: string) {
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [userMessages, setUserMessages] = useState<Message[]>([]);
+  const [aiMessages, setAiMessages] = useState<Message[]>([]);
   const [memberCount, setMemberCount] = useState(0);
   const [isConnected, setIsConnected] = useState(false);
 
@@ -38,12 +41,19 @@ export function useSocket(roomId: string) {
     });
 
     newSocket.on('room-info', (info: RoomInfo) => {
-      setMessages(info.recentMessages);
+      const userMsgs = info.recentMessages.filter(msg => !msg.isAI);
+      const aiMsgs = info.recentMessages.filter(msg => msg.isAI);
+      setUserMessages(userMsgs);
+      setAiMessages(aiMsgs);
       setMemberCount(info.memberCount);
     });
 
-    newSocket.on('new-message', (message: Message) => {
-      setMessages(prev => [...prev, message]);
+    newSocket.on('new-user-message', (message: Message) => {
+      setUserMessages(prev => [...prev, message]);
+    });
+
+    newSocket.on('new-ai-message', (message: Message) => {
+      setAiMessages(prev => [...prev, message]);
     });
 
     newSocket.on('user-joined', (data: { username: string; memberCount: number }) => {
@@ -63,17 +73,25 @@ export function useSocket(roomId: string) {
     };
   }, [roomId]);
 
-  const sendMessage = (text: string) => {
+  const sendUserMessage = (text: string, replyTo?: string, replyToUsername?: string) => {
     if (socket && isConnected) {
-      socket.emit('send-message', { text, roomId });
+      socket.emit('send-user-message', { text, roomId, replyTo, replyToUsername });
+    }
+  };
+
+  const sendAiMessage = (text: string) => {
+    if (socket && isConnected) {
+      socket.emit('send-ai-message', { text, roomId });
     }
   };
 
   return {
     socket,
-    messages,
+    userMessages,
+    aiMessages,
     memberCount,
     isConnected,
-    sendMessage
+    sendUserMessage,
+    sendAiMessage
   };
 }

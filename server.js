@@ -100,8 +100,8 @@ app.prepare().then(() => {
       console.log(`${username} joined room ${data.roomId}`);
     });
 
-    // User sends a message
-    socket.on('send-message', async (data) => {
+    // User sends a message to other users
+    socket.on('send-user-message', async (data) => {
       const user = activeUsers.get(socket.id);
       if (!user) return;
 
@@ -111,7 +111,9 @@ app.prepare().then(() => {
         username: user.username,
         isAI: false,
         timestamp: new Date(),
-        roomId: data.roomId
+        roomId: data.roomId,
+        replyTo: data.replyTo,
+        replyToUsername: data.replyToUsername
       };
 
       // Store message
@@ -121,7 +123,31 @@ app.prepare().then(() => {
       roomMessages.get(data.roomId).push(message);
 
       // Broadcast to room
-      io.to(data.roomId).emit('new-message', message);
+      io.to(data.roomId).emit('new-user-message', message);
+    });
+
+    // User sends a message to AI
+    socket.on('send-ai-message', async (data) => {
+      const user = activeUsers.get(socket.id);
+      if (!user) return;
+
+      const userMessage = {
+        id: Date.now().toString(),
+        text: data.text,
+        username: user.username,
+        isAI: false,
+        timestamp: new Date(),
+        roomId: data.roomId
+      };
+
+      // Store user message
+      if (!roomMessages.has(data.roomId)) {
+        roomMessages.set(data.roomId, []);
+      }
+      roomMessages.get(data.roomId).push(userMessage);
+
+      // Broadcast user message to room
+      io.to(data.roomId).emit('new-user-message', userMessage);
 
       // Simple AI response (you can enhance this with OpenAI API)
       setTimeout(() => {
@@ -136,7 +162,7 @@ app.prepare().then(() => {
         };
 
         roomMessages.get(data.roomId).push(aiMessage);
-        io.to(data.roomId).emit('new-message', aiMessage);
+        io.to(data.roomId).emit('new-ai-message', aiMessage);
       }, 1000);
     });
 

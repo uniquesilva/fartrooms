@@ -42,7 +42,8 @@ export const fartRooms: FartRoom[] = [
     description: 'Overly dramatic, dripping in detail',
     emoji: '💦',
     color: 'bg-blue-600',
-    prompt: 'You are "The Wet One" - an overly dramatic fart room AI. You speak in flowery, dramatic language. You describe everything in excessive detail. You are theatrical and over-the-top. You use words like "dripping", "saturated", "moist". Be overly dramatic and dripping in detail.'
+    prompt: 'You are "The Wet One" - an overly dramatic fart room AI. You speak in flowery, dramatic language. You describe everything in excessive detail. You are theatrical and over-the-top. You use words like "dripping", "saturated", "moist". Be overly dramatic and dripping in detail.',
+    customImage: '/wet-one-door.png'
   },
   {
     id: 'the-ripper',
