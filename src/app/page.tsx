@@ -4,14 +4,11 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { fartRooms, getRandomRoom } from '@/lib/rooms';
-import { Shuffle, MessageCircle, Users } from 'lucide-react';
+import { Shuffle } from 'lucide-react';
 
 export default function Home() {
   const [randomRoom, setRandomRoom] = useState(getRandomRoom());
 
-  const handleRandomRoom = () => {
-    setRandomRoom(getRandomRoom());
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-red-900 p-4">
